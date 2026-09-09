@@ -1,0 +1,351 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local eggsFolder = workspace:WaitForChild("RenderedEggs")
+
+local eggNames = {
+    "Dragon Egg",
+    "Giant Egg",
+    "White Egg",
+    "Brown Egg",
+    "Cracked Egg",
+    "Easter Egg",
+    "Stone Egg",
+    "Leaf Egg",
+    "Mushroom Egg",
+    "Flower Egg",
+    "Slime Egg",
+    "Ice Egg",
+    "Glass Egg",
+    "Golden Egg",
+    "Diamond Egg",
+    "Crystal Egg",
+    "Skull Egg",
+    "Asteroid Egg",
+    "Dominus Egg",
+    "Flaming Egg",
+    "Sinister Egg",
+    "Soul Egg",
+    "Aurora Egg",
+    "Galaxy Egg",
+    "Blackhole Egg",
+    "Cherub Egg"
+}
+
+-- Remove old GUI
+local oldGui = playerGui:FindFirstChild("EggFinder")
+
+if oldGui then
+    oldGui:Destroy()
+end
+
+-- Create GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "EggFinder"
+gui.ResetOnSpawn = false
+gui.Parent = playerGui
+
+-- Main frame
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 380, 0, 500)
+frame.Position = UDim2.new(0.5, -190, 0.5, -250)
+frame.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+frame.BorderSizePixel = 0
+frame.Parent = gui
+
+local frameCorner = Instance.new("UICorner")
+frameCorner.CornerRadius = UDim.new(0, 12)
+frameCorner.Parent = frame
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -150, 0, 45)
+title.Position = UDim2.new(0, 12, 0, 5)
+title.BackgroundTransparency = 1
+title.Text = "ALL EGG FINDER"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 21
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = frame
+
+-- Base button
+local baseButton = Instance.new("TextButton")
+baseButton.Size = UDim2.new(0, 60, 0, 35)
+baseButton.Position = UDim2.new(1, -135, 0, 10)
+baseButton.BackgroundColor3 = Color3.fromRGB(55, 100, 180)
+baseButton.Text = "BASE"
+baseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+baseButton.TextSize = 13
+baseButton.Font = Enum.Font.GothamBold
+baseButton.Parent = frame
+
+local baseCorner = Instance.new("UICorner")
+baseCorner.CornerRadius = UDim.new(0, 8)
+baseCorner.Parent = baseButton
+
+-- Middle button
+local middleButton = Instance.new("TextButton")
+middleButton.Size = UDim2.new(0, 65, 0, 35)
+middleButton.Position = UDim2.new(1, -70, 0, 10)
+middleButton.BackgroundColor3 = Color3.fromRGB(125, 75, 180)
+middleButton.Text = "MIDDLE"
+middleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+middleButton.TextSize = 12
+middleButton.Font = Enum.Font.GothamBold
+middleButton.Parent = frame
+
+local middleCorner = Instance.new("UICorner")
+middleCorner.CornerRadius = UDim.new(0, 8)
+middleCorner.Parent = middleButton
+
+-- Close button
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 35, 0, 35)
+closeButton.Position = UDim2.new(1, -42, 1, -42)
+closeButton.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+closeButton.Text = "X"
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.TextSize = 17
+closeButton.Font = Enum.Font.GothamBold
+closeButton.Parent = frame
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 8)
+closeCorner.Parent = closeButton
+
+-- Scroll frame
+local scroll = Instance.new("ScrollingFrame")
+scroll.Size = UDim2.new(1, -20, 1, -65)
+scroll.Position = UDim2.new(0, 10, 0, 55)
+scroll.BackgroundTransparency = 1
+scroll.BorderSizePixel = 0
+scroll.ScrollBarThickness = 6
+scroll.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 110)
+scroll.CanvasSize = UDim2.new(0, 0, 0, #eggNames * 48)
+scroll.Parent = frame
+
+local layout = Instance.new("UIListLayout")
+layout.Padding = UDim.new(0, 5)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Parent = scroll
+
+local buttons = {}
+
+-- Find egg
+local function findEgg(name)
+    return eggsFolder:FindFirstChild(name)
+end
+
+-- Teleport to egg
+local function teleportToEgg(name)
+    local egg = findEgg(name)
+    local character = player.Character
+
+    if not egg or not character then
+        return
+    end
+
+    local success, pivot = pcall(function()
+        return egg:GetPivot()
+    end)
+
+    if success then
+        character:PivotTo(pivot + Vector3.new(0, 5, 0))
+    end
+end
+
+-- Teleport to BASE
+local function teleportToBase()
+    local plots = workspace:FindFirstChild("Plots")
+    local plot = plots and plots:FindFirstChild("Plot")
+    local character = player.Character
+
+    if not plot or not character then
+        return
+    end
+
+    local success, pivot = pcall(function()
+        return plot:GetPivot()
+    end)
+
+    if success then
+        character:PivotTo(pivot + Vector3.new(0, 5, 0))
+    elseif plot:IsA("BasePart") then
+        character:PivotTo(plot.CFrame + Vector3.new(0, 5, 0))
+    end
+end
+
+-- Teleport to MIDDLE
+local function teleportToMiddle()
+    local children = workspace:GetChildren()
+    local middle = children[58]
+    local character = player.Character
+
+    if not middle or not character then
+        return
+    end
+
+    local success, pivot = pcall(function()
+        return middle:GetPivot()
+    end)
+
+    if success then
+        character:PivotTo(pivot + Vector3.new(0, 5, 0))
+    elseif middle:IsA("BasePart") then
+        character:PivotTo(middle.CFrame + Vector3.new(0, 5, 0))
+    end
+end
+
+baseButton.MouseButton1Click:Connect(teleportToBase)
+middleButton.MouseButton1Click:Connect(teleportToMiddle)
+
+-- Close
+closeButton.MouseButton1Click:Connect(function()
+    gui:Destroy()
+end)
+
+-- Create egg buttons
+for index, name in ipairs(eggNames) do
+
+    local button = Instance.new("TextButton")
+
+    button.Name = name:gsub("%s+", "_")
+    button.Size = UDim2.new(1, -5, 0, 43)
+    button.BackgroundColor3 = Color3.fromRGB(75, 40, 40)
+    button.BorderSizePixel = 0
+    button.TextColor3 = Color3.fromRGB(190, 190, 190)
+    button.TextSize = 14
+    button.Font = Enum.Font.GothamBold
+    button.Text = name .. "  |  NOT FOUND"
+    button.LayoutOrder = index
+    button.AutoButtonColor = false
+    button.Parent = scroll
+
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(0, 7)
+    buttonCorner.Parent = button
+
+    buttons[name] = button
+
+    button.MouseButton1Click:Connect(function()
+        if findEgg(name) then
+            teleportToEgg(name)
+        end
+    end)
+end
+
+-- Update one egg
+local function updateButton(name)
+
+    local button = buttons[name]
+
+    if not button then
+        return
+    end
+
+    if findEgg(name) then
+
+        button.Text = name .. "  |  ACTIVE"
+        button.BackgroundColor3 = Color3.fromRGB(35, 145, 70)
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+    else
+
+        button.Text = name .. "  |  NOT FOUND"
+        button.BackgroundColor3 = Color3.fromRGB(75, 40, 40)
+        button.TextColor3 = Color3.fromRGB(190, 190, 190)
+
+    end
+end
+
+-- Update all eggs
+local function updateAll()
+
+    for _, name in ipairs(eggNames) do
+        updateButton(name)
+    end
+
+end
+
+updateAll()
+
+-- Egg appeared
+eggsFolder.ChildAdded:Connect(function(child)
+
+    if buttons[child.Name] then
+        updateButton(child.Name)
+    end
+
+end)
+
+-- Egg disappeared
+eggsFolder.ChildRemoved:Connect(function(child)
+
+    if buttons[child.Name] then
+        updateButton(child.Name)
+    end
+
+end)
+
+-- Backup scan
+task.spawn(function()
+
+    while gui.Parent do
+
+        task.wait(1)
+
+        updateAll()
+
+    end
+
+end)
+
+--// DRAG SYSTEM
+
+local dragging = false
+local dragStart
+local startPosition
+
+title.InputBegan:Connect(function(input)
+
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+
+        dragging = true
+        dragStart = input.Position
+        startPosition = frame.Position
+
+        input.Changed:Connect(function()
+
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+
+        end)
+
+    end
+
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+
+    if dragging and (
+        input.UserInputType == Enum.UserInputType.MouseMovement
+        or input.UserInputType == Enum.UserInputType.Touch
+    ) then
+
+        local delta = input.Position - dragStart
+
+        frame.Position = UDim2.new(
+            startPosition.X.Scale,
+            startPosition.X.Offset + delta.X,
+            startPosition.Y.Scale,
+            startPosition.Y.Offset + delta.Y
+        )
+
+    end
+
+end)
