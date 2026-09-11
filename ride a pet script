@@ -161,9 +161,6 @@ subtitle.Parent = header
 
 --//==================================================
 --// TOP BUTTONS
---//
---// Layout:
---//                  BASE    −    X
 --//==================================================
 
 -- BASE
@@ -286,39 +283,42 @@ local function teleportToEgg(name)
 end
 
 --//==================================================
---// TELEPORT TO BASE / PLOT
+--// TELEPORT TO PLAYER'S BASE
 --//==================================================
 
 local function teleportToBase()
 
     local plots = workspace:FindFirstChild("Plots")
-    local plot = plots and plots:FindFirstChild("Plot")
     local character = player.Character
 
-    if not plot or not character then
+    if not plots or not character then
         return
     end
 
-    local success, pivot = pcall(function()
-        return plot:GetPivot()
-    end)
+    -- Search every plot
+    for _, plot in ipairs(plots:GetChildren()) do
 
-    if success then
+        local data = plot:FindFirstChild("Data")
+        local owner = data and data:FindFirstChild("Owner")
+        local baseplate = plot:FindFirstChild("Baseplate")
 
-        character:PivotTo(
-            pivot + Vector3.new(0, 5, 0)
-        )
+        -- Check if this plot belongs to the local player
+        if owner and owner.Value == player and baseplate then
 
-    elseif plot:IsA("BasePart") then
+            -- Teleport 5 studs above the base
+            character:PivotTo(
+                baseplate.CFrame + Vector3.new(0, 5, 0)
+            )
 
-        character:PivotTo(
-            plot.CFrame + Vector3.new(0, 5, 0)
-        )
-
+            return
+        end
     end
 end
 
-baseButton.MouseButton1Click:Connect(teleportToBase)
+--// BASE BUTTON
+baseButton.MouseButton1Click:Connect(function()
+    teleportToBase()
+end)
 
 --//==================================================
 --// CREATE EGG BUTTONS
@@ -435,7 +435,6 @@ task.spawn(function()
     while gui.Parent do
 
         task.wait(1)
-
         updateAll()
 
     end
@@ -548,30 +547,13 @@ minimizeButton.MouseButton1Click:Connect(function()
 end)
 
 --//==================================================
---// RESTORE
---//==================================================
-
-miniButton.MouseButton1Click:Connect(function()
-
-    frame.Position = UDim2.new(
-        miniButton.Position.X.Scale,
-        miniButton.Position.X.Offset,
-        miniButton.Position.Y.Scale,
-        miniButton.Position.Y.Offset
-    )
-
-    frame.Visible = true
-    miniButton.Visible = false
-
-end)
-
---//==================================================
---// DRAG MINI N
+--// MINI N DRAG + CLICK
 --//==================================================
 
 local miniDragging = false
 local miniDragStart
 local miniStartPosition
+local miniMoved = false
 
 miniButton.InputBegan:Connect(function(input)
 
@@ -579,16 +561,10 @@ miniButton.InputBegan:Connect(function(input)
         or input.UserInputType == Enum.UserInputType.Touch then
 
         miniDragging = true
+        miniMoved = false
+
         miniDragStart = input.Position
         miniStartPosition = miniButton.Position
-
-        input.Changed:Connect(function()
-
-            if input.UserInputState == Enum.UserInputState.End then
-                miniDragging = false
-            end
-
-        end)
 
     end
 
@@ -603,6 +579,11 @@ UserInputService.InputChanged:Connect(function(input)
 
         local delta = input.Position - miniDragStart
 
+        -- Only consider it a drag after moving 5 pixels
+        if math.abs(delta.X) > 5 or math.abs(delta.Y) > 5 then
+            miniMoved = true
+        end
+
         miniButton.Position = UDim2.new(
             miniStartPosition.X.Scale,
             miniStartPosition.X.Offset + delta.X,
@@ -610,6 +591,38 @@ UserInputService.InputChanged:Connect(function(input)
             miniStartPosition.Y.Scale,
             miniStartPosition.Y.Offset + delta.Y
         )
+
+    end
+
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+
+        if miniDragging then
+
+            miniDragging = false
+
+            -- If the player only clicked, restore the GUI.
+            -- If they dragged, keep the N where it was dropped.
+            if not miniMoved then
+
+                frame.Position = UDim2.new(
+                    miniButton.Position.X.Scale,
+                    miniButton.Position.X.Offset,
+
+                    miniButton.Position.Y.Scale,
+                    miniButton.Position.Y.Offset
+                )
+
+                frame.Visible = true
+                miniButton.Visible = false
+
+            end
+
+        end
 
     end
 
